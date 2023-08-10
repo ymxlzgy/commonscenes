@@ -1,6 +1,9 @@
 # CommonScenes
 
-This is the official implementation of the paper **CommonScenes: Generating Commonsense 3D Indoor Scenes with Scene Graphs | <a href="https://arxiv.org/pdf/2305.16283.pdf">arxiv</a>** <br/>
+This is the official implementation of the paper **CommonScenes: Generating Commonsense 3D Indoor Scenes with Scene Graphs **
+
+<a href="https://sites.google.com/view/commonscenes">Website</a> | <a href="https://arxiv.org/pdf/2305.16283.pdf">Arxiv</a>
+
 Guangyao Zhai, Evin Pınar Örnek, Shun-Cheng Wu, Yan Di, Federico Tombari, Nassir Navab, and Benjamin Busam<br/>
 **Arxiv Preprint**
 
