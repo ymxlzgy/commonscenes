@@ -1,6 +1,6 @@
 # CommonScenes
 
-This is the official implementation of the paper **CommonScenes: Generating Commonsense 3D Indoor Scenes with Scene Graphs **
+This is the official implementation of the paper **CommonScenes: Generating Commonsense 3D Indoor Scenes with Scene Graphs**
 
 <a href="https://sites.google.com/view/commonscenes">Website</a> | <a href="https://arxiv.org/pdf/2305.16283.pdf">Arxiv</a>
 
