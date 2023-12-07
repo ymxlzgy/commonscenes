@@ -1,0 +1,36 @@
+hyper:
+    batch_size: 32
+    gpu_ids: 0,1
+    logs_dir: experiments/diff_concat
+    results_dir: experiments/diff_concat
+    name: ./
+    isTrain: True
+    device: 'cuda'
+    distributed: 0
+dataset:
+    res: 64
+    trunc_thres: 0.2
+    ratio: 1
+network:
+    model: sdfusion-txt2shape
+    ckpt: null
+    df_cfg: ../config/sdfusion-txt2shape_concat.yaml
+    ddim_steps: 100
+    ddim_eta: 0.0
+    uc_scale: 3.0
+    vq_model: vqvae
+    vq_cfg: ../config/vqvae_snet.yaml
+    vq_dset: None
+    vq_cat: None
+    vq_ckpt: ./checkpoint/vqvae_threedfront_best.pth
+misc:
+    debug: 0
+    seed: 111
+    backend: gloo
+    local_rank: 0
+
+training:
+    lr: 1e-5
+    lr_policy: lambda
+    lr_decay_iters: 50
+    lambda_L1: 10.0
