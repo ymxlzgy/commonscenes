@@ -47,7 +47,7 @@ python setup.py install
 ### Models
 **Essential:** Download pretrained VQ-VAE model from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/vqvae_threedfront_best.pth) to the folder `scripts/checkpoint`.
 
-**Optional:** We provide trained models available here.
+**Optional:** We provide two trained models of CommonScenes available [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/balancing.zip).
 ## Training
 
 To train the models, run:
@@ -78,6 +78,8 @@ To evaluate the models run:
 cd scripts
 python eval_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all --epoch 180 --visualize False --evaluate_diversity False --num_samples 5 --gen_shape False --no_stool True
 ```
+`--exp`: where you store the models.
+
 `--gen_shape`: set `True` if you want to make diffusion-based shape branch work.
 
 `--evaluate_diversity`: set `True` if you want to compute diversity. This takes a while, so it's disabled by default.
@@ -86,7 +88,7 @@ python eval_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all 
 
 
 ### FID/KID
-This metric aims to evaluate scene-level fidelity. To evaluate FID/KID, you need to first download our preprocessed files of 3D-FUTURE models from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/3D-FUTURE-SDF.zip), then collect ground truth top-down renderings by running `collect_gt_sdf_images.py`.
+This metric aims to evaluate scene-level fidelity. To evaluate FID/KID, you need to first download our preprocessed files of 3D-FUTURE meshes from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/3D-FUTURE-SDF.zip), then collect ground truth top-down renderings by running `collect_gt_sdf_images.py`.
 
 Make sure you download all the files and preprocess the 3D-FRONT. The renderings of generated scenes can be obtained inside `eval_3dfront.py`.
 
@@ -96,7 +98,7 @@ This metric aims to evaluate object-level fidelity. Please follow the implementa
 
 After obtaining object meshes, run `compute_mmd_cov_1nn.py` to have the results.
 ## Acknowledgements
-If you find this code useful in your research, please cite
+If you find this work useful in your research, please cite
 
 ```
 @article{zhai2023commonscenes,
