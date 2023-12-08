@@ -484,7 +484,7 @@ class Sg2ScVAEModel(nn.Module):
             points = point_ae.forward_inference_from_latent_space(samples[-1], point_ae.get_grid())
             return samples[:-1], (points, samples[-1])
 
-    def sample_3dfront(self, point_classes_idx, point_ae, mean_est, cov_est, dec_objs,  dec_triples, attributes=None):
+    def sample_3dfront(self, point_classes_idx, mean_est, cov_est, dec_objs,  dec_triples, attributes=None):
         with torch.no_grad():
             z = torch.from_numpy(
                 np.random.multivariate_normal(mean_est, cov_est, dec_objs.size(0))).float().cuda()

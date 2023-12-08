@@ -143,7 +143,14 @@ class ThreedFrontDatasetSceneGraph(data.Dataset):
         #                       'coffee_table', 'console_table', 'corner_side_table', 'desk', 'dining_chair', 'dining_table', 'double_bed', 'dressing_chair',
         #                       'dressing_table', 'kids_bed', 'l_shaped_sofa', 'lazy_sofa', 'lounge_chair', 'loveseat_sofa', 'multi_seat_sofa', 'nightstand', 'pendant_lamp',
         #                       'round_end_table', 'shelf', 'single_bed', 'sofa', 'stool', 'table', 'tv_stand', 'wardrobe', 'wine_cabinet']
+
+        # Why we do this here? It is because that we want to make each category evenly sampled during the diffusion
+        # training. You can see the objects are classified/mapped into coarse categories, which will cause the number
+        # of objects in each category are very different from each other. For example, Chairs are the most and lamps
+        # are the fewest among all the objects. So when we sample a batch in more fine-grained classes, the problem
+        # can be alleviated.
         self.vocab['object_idx_to_name_grained'] = self.vocab['object_idx_to_name']
+
         if not self.large:
             self.fine_grained_classes = dict(zip(sorted([voc.strip('\n') for voc in self.vocab['object_idx_to_name']]),range(len(self.vocab['object_idx_to_name']))))
             self.vocab['object_idx_to_name'] = [self.mapping_full2simple[voc.strip('\n')]+'\n' for voc in self.vocab['object_idx_to_name']]
@@ -171,7 +178,7 @@ class ThreedFrontDatasetSceneGraph(data.Dataset):
             self.cond_model_cpu, preprocess_cpu = clip.load("ViT-B/32", device='cpu')
             print('loading CLIP')
             print(
-                'Checking for missing clip feats. This can be slow the first time.\nThis process needs to be only run once!')
+                'Checking for missing clip feats. This can be slow the first time.')
             for index in tqdm(range(len(self))):
                 self.__getitem__(index)
             self.recompute_clip = False

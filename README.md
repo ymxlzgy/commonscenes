@@ -13,13 +13,13 @@ This is the official implementation of the paper **CommonScenes: Generating Comm
 ## Setup
 ### Environment
 Download the code and go the folder.
-```bash
+```javascript
 git clone https://github.com/ymxlzgy/commonscenes
 cd commonscenes
 ```
 We have tested it on Ubuntu 20.04 with Python 3.8, PyTorch 1.11.0, CUDA 11.3 and [Pytorch3D](https://github.com/facebookresearch/pytorch3d/blob/main/INSTALL.md#3-install-wheels-for-linux).
 
-```bash
+```javascript
 conda create -n commonscenes python=3.8
 conda activate commonscenes
 pip install -r requirements.txt 
@@ -27,11 +27,15 @@ pip install einops omegaconf tensorboardx open3d
 ```
 
 To install CLIP, follow this <a href="[https://github.com/TheoDEPRELLE/AtlasNetV2](https://github.com/openai/CLIP)">OpenAI CLIP repo</a>:
-```
+```javascript
 pip install ftfy regex tqdm
 pip install git+https://github.com/openai/CLIP.git
 ```
-
+Setup additional Chamfer Distance calculation for evaluation:
+```javascript
+cd ./extension
+python setup.py install
+```
 ### Dataset
 
 1. Download the <a href="https://tianchi.aliyun.com/specials/promotion/alibaba-3d-scene-dataset">3D-FRONT dataset</a> from their official site.
@@ -40,8 +44,11 @@ pip install git+https://github.com/openai/CLIP.git
 
 3. Follow [this page](./SG-FRONT.md) for downloading SG-FRONT and accessing more information.
 
+### Models
+**Essential:** Download pretrained VQ-VAE model from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/vqvae_threedfront_best.pth) to the folder `scripts/checkpoint`.
+
+**Optional:** We provide trained models available here.
 ## Training
-Download pretrained VQ-VAE model from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/vqvae_threedfront_best.pth) to the folder `scripts/checkpoint`.
 
 To train the models, run:
 
@@ -58,7 +65,7 @@ python train_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all
 
 `--with_CLIP `: set to `True` if train v2_box or v2_full, and not used in other cases.
 
-`--batch_size`: the batch size for the layout branch training. (Note: the one for the shape branch is in `v2_full.yaml` and `v2_full_concat.yaml`)
+`--batch_size`: the batch size for the layout branch training. (**Note:** the one for the shape branch is in `v2_full.yaml` and `v2_full_concat.yaml`. The meaning of each batch size can be found in the [Supplementary Material G.1](https://arxiv.org/pdf/2305.16283.pdf).)
 
 `--large` : default is `False`, `True` means more concrete categories.
 

@@ -190,7 +190,7 @@ class VAE(nn.Module):
                 self.mean_est, self.cov_est = self.vae_v2.collect_train_statistics(stats_dataloader)
                 pickle.dump([self.mean_est, self.cov_est], open(stats_f, 'wb'))
 
-    def decoder_with_changes_boxes_and_shape(self, z_box, z_shape, objs, triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes, manipulated_nodes, atlas, box_data=None, gen_shape=False):
+    def decoder_with_changes_boxes_and_shape(self, z_box, z_shape, objs, triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes, manipulated_nodes, box_data=None, gen_shape=False):
         if self.type_ == 'v1_full':
             boxes, feats, keep = self.vae.decoder_with_changes(z_box, objs, triples, attributes, missing_nodes, manipulated_nodes)
             points, _ = self.decode_g2sv1(objs, feats, box_data, retrieval=True)
@@ -233,7 +233,7 @@ class VAE(nn.Module):
             return None, None
 
     def decoder_with_additions_boxes_and_shape(self, z_box, z_shape, objs, triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes,
-                                               manipulated_nodes, atlas, gen_shape=False):
+                                               manipulated_nodes, gen_shape=False):
         if self.type_ == 'v1_full':
             outs, keep = self.vae.decoder_with_additions(z_box, objs, triples, attributes, missing_nodes, manipulated_nodes)
             return outs[:2], None, outs[2], keep
@@ -283,14 +283,14 @@ class VAE(nn.Module):
             return None, None
         return z, log_var
 
-    def sample_box_and_shape(self, point_classes_idx, point_ae, dec_objs, dec_triplets, dec_sdfs, encoded_dec_text_feat, encoded_dec_rel_feat, attributes=None, gen_shape=False):
+    def sample_box_and_shape(self, point_classes_idx, dec_objs, dec_triplets, dec_sdfs, encoded_dec_text_feat, encoded_dec_rel_feat, attributes=None, gen_shape=False):
         if self.type_ == 'v1_full':
-            return self.vae.sample_3dfront(point_classes_idx, point_ae, self.mean_est, self.cov_est, dec_objs, dec_triplets, attributes)
+            return self.vae.sample_3dfront(point_classes_idx, self.mean_est, self.cov_est, dec_objs, dec_triplets, attributes)
         elif self.type_ == 'v2_full':
             return self.vae_v2.sample(point_classes_idx, self.mean_est, self.cov_est, dec_objs, dec_triplets, dec_sdfs, encoded_dec_text_feat, encoded_dec_rel_feat,
                                    attributes, gen_shape=gen_shape)
         boxes = self.sample_box(dec_objs, dec_triplets, encoded_dec_text_feat, encoded_dec_rel_feat, attributes)
-        shapes = self.sample_shape(point_classes_idx, dec_objs, point_ae, dec_triplets, attributes)
+        shapes = self.sample_shape(point_classes_idx, dec_objs, dec_triplets, attributes)
         return boxes, shapes
 
     def get_closest_vec(self, class_name, shape_vec, box_data):
@@ -326,7 +326,7 @@ class VAE(nn.Module):
         elif self.type_ == 'v2_full':
             return self.vae_v2.sample(self.mean_est, self.cov_est, dec_objs, dec_triplets, encoded_dec_text_feat, encoded_dec_rel_feat, attributes)[0]
 
-    def sample_shape(self, point_classes_idx, dec_objs, point_ae, dec_triplets, attributes=None):
+    def sample_shape(self, point_classes_idx, dec_objs, dec_triplets, attributes=None):
         if self.type_ == 'v1_full':
             return self.vae.sample(self.mean_est, self.cov_est, dec_objs, dec_triplets, attributes)[1]
 

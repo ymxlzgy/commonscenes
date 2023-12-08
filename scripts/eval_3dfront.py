@@ -11,13 +11,15 @@ import torch
 import torch.nn.parallel
 import torch.utils.data
 
+import sys
+from pathlib import Path
+parent_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(parent_dir))
 from model.VAE import VAE
 from dataset.threedfront_dataset import ThreedFrontDatasetSceneGraph
 from helpers.util import bool_flag, batch_torch_denormalize_box_params, sample_points
 from helpers.metrics_3dfront import validate_constrains, validate_constrains_changes, estimate_angular_std
-from helpers.visualize_graph import run as vis_graph
 from helpers.visualize_scene import render, render_v2_full, render_v2_box, render_v1_full
-import helpers.retrieval as retrieval
 
 import extension.dist_chamfer as ext
 chamfer = ext.chamferDist()
@@ -65,9 +67,6 @@ def evaluate():
     with open(argsJson) as j:
         modelArgs = json.load(j)
     normalized_file = os.path.join(args.dataset, 'boxes_centered_stats_{}_trainval.txt').format(modelArgs['room_type'])
-
-    saved_model = torch.load(args.path2atlas)
-
     test_dataset_rels_changes = ThreedFrontDatasetSceneGraph(
         root=args.dataset,
         split='val_scans',
@@ -79,9 +78,9 @@ def evaluate():
         with_CLIP=modelArgs['with_CLIP'],
         use_SDF=modelArgs['with_SDF'],
         recompute_feats=False,
-        no_stool=args.no_stool,
         large=modelArgs['large'],
-        room_type=args.room_type)
+        room_type=args.room_type,
+        recompute_clip=False)
 
     test_dataset_addition_changes = ThreedFrontDatasetSceneGraph(
         root=args.dataset,
@@ -93,7 +92,6 @@ def evaluate():
         with_feats=modelArgs['with_feats'],
         with_CLIP=modelArgs['with_CLIP'],
         use_SDF=modelArgs['with_SDF'],
-        no_stool=args.no_stool,
         large=modelArgs['large'],
         room_type=args.room_type)
 
@@ -107,7 +105,6 @@ def evaluate():
         with_feats=modelArgs['with_feats'],
         with_CLIP=modelArgs['with_CLIP'],
         use_SDF=False,
-        no_stool=args.no_stool,
         large=modelArgs['large'],
         room_type=modelArgs['room_type'])
 
@@ -120,7 +117,6 @@ def evaluate():
         with_feats=modelArgs['with_feats'],
         with_CLIP=modelArgs['with_CLIP'],
         use_SDF=modelArgs['with_SDF'],
-        no_stool=args.no_stool,
         large=modelArgs['large'],
         room_type=args.room_type)
 
@@ -193,21 +189,21 @@ def evaluate():
 
     print('\nEditing Mode - Additions')
     reseed(47)
-    # validate_constrains_loop_w_changes(modelArgs, test_dataloader_add_changes, model, normalized_file=normalized_file, with_diversity=args.evaluate_diversity, atlas=point_ae, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
+    validate_constrains_loop_w_changes(modelArgs, test_dataloader_add_changes, model, normalized_file=normalized_file, with_diversity=args.evaluate_diversity, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
 
     reseed(47)
     print('\nEditing Mode - Relationship changes')
-    # validate_constrains_loop_w_changes(modelArgs, test_dataloader_rels_changes, model,  normalized_file=normalized_file, with_diversity=args.evaluate_diversity, atlas=point_ae, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
+    validate_constrains_loop_w_changes(modelArgs, test_dataloader_rels_changes, model,  normalized_file=normalized_file, with_diversity=args.evaluate_diversity, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
 
     reseed(47)
     print('\nGeneration Mode')
     validate_constrains_loop(modelArgs, test_dataloader_no_changes, model, epoch=args.epoch, normalized_file=normalized_file, with_diversity=args.evaluate_diversity,
                              with_angles=modelArgs['with_angles'], num_samples=args.num_samples, vocab=test_dataset_no_changes.vocab,
-                             point_classes_idx=test_dataset_no_changes.point_classes_idx, point_ae=point_ae,
+                             point_classes_idx=test_dataset_no_changes.point_classes_idx,
                              export_3d=args.export_3d, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
 
 
-def validate_constrains_loop_w_changes(modelArgs, testdataloader, model, normalized_file=None, with_diversity=True, atlas=None, with_angles=False, num_samples=3, cat2objs=None, datasize='large', gen_shape=False):
+def validate_constrains_loop_w_changes(modelArgs, testdataloader, model, normalized_file=None, with_diversity=True, with_angles=False, num_samples=3, cat2objs=None, datasize='large', gen_shape=False):
     if with_diversity and num_samples < 2:
         raise ValueError('Diversity requires at least two runs (i.e. num_samples > 1).')
 
@@ -239,11 +235,6 @@ def validate_constrains_loop_w_changes(modelArgs, testdataloader, model, normali
             if 'feats' in data['encoder']:
                 encoded_enc_points = data['encoder']['feats']
                 encoded_enc_points = encoded_enc_points.float().cuda()
-            if 'points' in data['encoder']:
-                enc_points = data['encoder']['points']
-                enc_points = enc_points.cuda()
-                with torch.no_grad():
-                    encoded_enc_points = atlas.encoder(enc_points.transpose(2,1).contiguous())
 
             dec_objs, dec_triples, dec_tight_boxes, dec_objs_to_scene, dec_triples_to_scene = data['decoder']['objs'], \
                                                                                               data['decoder']['tripltes'], \
@@ -286,13 +277,15 @@ def validate_constrains_loop_w_changes(modelArgs, testdataloader, model, normali
             (z_box, _), (z_shape, _) = model.encode_box_and_shape(enc_objs, enc_triples, encoded_enc_text_feat, encoded_enc_rel_feat, encoded_enc_points, enc_boxes, enc_angles, attributes)
 
             if args.manipulate:
-                boxes_pred, shapes_pred, keep = model.decoder_with_changes_boxes_and_shape(z_box, z_shape, dec_objs,
-                                                                                           dec_triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes, manipulated_nodes, atlas, box_data=box_data, gen_shape=gen_shape)
+                boxes_pred, shapes_pred, keep = model.decoder_with_changes_boxes_and_shape(z_box, z_shape, dec_objs, dec_triples, encoded_dec_text_feat,
+                                                                                           encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes, manipulated_nodes,
+                                                                                           box_data=box_data, gen_shape=gen_shape)
                 if with_angles:
                     boxes_pred, angles_pred = boxes_pred
             else:
-                boxes_pred, angles_pred, shapes_pred, keep = model.decoder_with_additions_boxes_and_shape(z_box, z_shape, dec_objs,
-                                                                                             dec_triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes,  manipulated_nodes, atlas, gen_shape=gen_shape)
+                boxes_pred, angles_pred, shapes_pred, keep = model.decoder_with_additions_boxes_and_shape(z_box, z_shape, dec_objs, dec_triples, encoded_dec_text_feat,
+                                                                                                          encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes,  manipulated_nodes,
+                                                                                                          gen_shape=gen_shape)
                 if with_angles and angles_pred is None:
                     boxes_pred, angles_pred = boxes_pred
 
@@ -312,11 +305,10 @@ def validate_constrains_loop_w_changes(modelArgs, testdataloader, model, normali
                             #TODO modify v1
                             diversity_boxes, diversity_points, diversity_keep = model.decoder_with_changes_boxes_and_shape(
                                 z_box, z_shape, dec_objs, dec_triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes, manipulated_nodes,
-                                atlas, box_data=box_data, gen_shape=gen_shape)
+                                box_data=box_data, gen_shape=gen_shape)
                         else:
                             diversity_boxes, diversity_angles, diversity_points, diversity_keep = model.decoder_with_additions_boxes_and_shape(
-                                z_box, z_shape, dec_objs, dec_triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes, manipulated_nodes,
-                                atlas)
+                                z_box, z_shape, dec_objs, dec_triples, encoded_dec_text_feat, encoded_dec_rel_feat, dec_sdfs, attributes, missing_nodes, manipulated_nodes)
 
                         if model.type_ == 'v2_full':
                             from model.diff_utils.util_3d import sdf_to_mesh
@@ -450,7 +442,7 @@ def validate_constrains_loop_w_changes(modelArgs, testdataloader, model, normali
 
 
 def validate_constrains_loop(modelArgs, testdataloader, model, epoch=None, normalized_file=None, with_diversity=True, with_angles=False, vocab=None,
-                             point_classes_idx=None, point_ae=None, export_3d=False, cat2objs=None, datasize='large',
+                             point_classes_idx=None, export_3d=False, cat2objs=None, datasize='large',
                              num_samples=3, gen_shape=False):
 
     if with_diversity and num_samples < 2:
@@ -490,7 +482,7 @@ def validate_constrains_loop(modelArgs, testdataloader, model, epoch=None, norma
             box_data['chair'].update(box_data['stool'])
 
     for i, data in enumerate(testdataloader, 0):
-        print(data['scan_id'])
+        # print(data['scan_id'])
         # if data['scan_id'][0] != 'LivingDiningRoom-13945':
         #     continue
         # if data['scan_id'][0].split('-')[0] not in ['DiningRoom', "LivingDiningRoom"]:
@@ -518,7 +510,7 @@ def validate_constrains_loop(modelArgs, testdataloader, model, epoch=None, norma
 
         with torch.no_grad():
 
-            boxes_pred, shapes_pred = model.sample_box_and_shape(point_classes_idx, point_ae, dec_objs, dec_triples, dec_sdfs, encoded_dec_text_feat, encoded_dec_rel_feat, attributes=None, gen_shape=gen_shape)
+            boxes_pred, shapes_pred = model.sample_box_and_shape(point_classes_idx, dec_objs, dec_triples, dec_sdfs, encoded_dec_text_feat, encoded_dec_rel_feat, attributes=None, gen_shape=gen_shape)
             if with_angles:
                 boxes_pred, angles_pred = boxes_pred
                 angles_pred = -180 + (torch.argmax(angles_pred, dim=1, keepdim=True) + 1)* 15.0 # TODO angle (previously minus 1, now add it back)
@@ -575,7 +567,7 @@ def validate_constrains_loop(modelArgs, testdataloader, model, epoch=None, norma
                        classed_idx=dec_objs, store_img=True, render_boxes=False, visual=True, demo=False, no_stool = args.no_stool, without_lamp=True)
             elif model.type_ == 'v1_full':
                 render_v1_full(model.type_, data['scan_id'], dec_objs.detach().cpu().numpy(), boxes_pred_den, angles_pred, datasize=datasize, classes=classes, render_type='v1', classed_idx=dec_objs,
-                    shapes_pred=shapes_pred, store_img=True, render_boxes=False, visual=False, demo=False, no_stool = args.no_stool, without_lamp=True, sdf_renderer=sdf_renderer)
+                    shapes_pred=shapes_pred, store_img=True, render_boxes=False, visual=False, demo=False, no_stool = args.no_stool, without_lamp=True)
             elif model.type_ == 'v2_full':
                 if shapes_pred is not None:
                     shapes_pred = shapes_pred.cpu().detach()
@@ -591,7 +583,7 @@ def validate_constrains_loop(modelArgs, testdataloader, model, epoch=None, norma
             boxes_diversity_sample, shapes_sample, angle_diversity_sample, diversity_retrieval_ids_sample = [], [], [], []
             for sample in range(num_samples):
                 # reseed(int(time.time()))
-                diversity_boxes, diversity_points = model.sample_box_and_shape(point_classes_idx, point_ae, dec_objs, dec_triples, dec_sdfs, encoded_dec_text_feat, encoded_dec_rel_feat,
+                diversity_boxes, diversity_points = model.sample_box_and_shape(point_classes_idx, dec_objs, dec_triples, dec_sdfs, encoded_dec_text_feat, encoded_dec_rel_feat,
                                                                                attributes=None, gen_shape=True)
                 if model.type_ == 'v2_full':
                     from model.diff_utils.util_3d import sdf_to_mesh
@@ -615,12 +607,6 @@ def validate_constrains_loop(modelArgs, testdataloader, model, epoch=None, norma
 
                 if with_angles:
                     diversity_boxes, diversity_angles = diversity_boxes
-                # if model.type_ == 'sln':
-                #     diversity_points, diversity_retrieval_ids = retrieval.rio_retrieve(
-                #         dec_objs, diversity_boxes, vocab, cat2objs, testdataloader.dataset.root_3rscan,
-                #         return_retrieval_id=True)
-                # else:
-                # diversity_points = diversity_points[0] # TODO inspect this
 
                 # Computing shape diversity on canonical and normalized shapes
                 normalized_points = []
