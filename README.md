@@ -1,6 +1,6 @@
 # CommonScenes
 
-This is the official implementation of the paper **CommonScenes: Generating Commonsense 3D Indoor Scenes with Scene Graphs**. Based on diffusion model, we propose a method to generate entire 3D scene from scene graphs, encompassing its layout and 3D geometries holistically. 
+This is the official implementation of the paper **CommonScenes: Generating Commonsense 3D Indoor Scenes with Scene Graph Diffusion**. Based on diffusion model, we propose a method to generate entire 3D scene from scene graphs, encompassing its layout and 3D geometries holistically. 
 
 
 <a href="https://sites.google.com/view/commonscenes">Website</a> | <a href="https://arxiv.org/pdf/2305.16283.pdf">Arxiv</a>
@@ -37,13 +37,27 @@ cd ./extension
 python setup.py install
 ```
 ### Dataset
+1. Create a folder named `FRONT`
+2. Download the <a href="https://tianchi.aliyun.com/specials/promotion/alibaba-3d-scene-dataset">3D-FRONT dataset</a> from their official site.
 
-1. Download the <a href="https://tianchi.aliyun.com/specials/promotion/alibaba-3d-scene-dataset">3D-FRONT dataset</a> from their official site.
+3. Preprocess the dataset following  <a href="https://github.com/nv-tlabs/ATISS#data-preprocessing">ATISS</a>.
+4. Download [3D-FUTURE-SDF](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/3D-FUTURE-SDF.zip). This is processed by ourselves on the 3D-FUTURE meshes using tools in [SDFusion](https://github.com/yccyenchicheng/SDFusion).
 
-2. Preprocess the dataset following  <a href="https://github.com/nv-tlabs/ATISS#data-preprocessing">ATISS</a>.
+5. Follow [this page](./SG-FRONT.md) for downloading SG-FRONT and accessing more information.
+6. Copy all files to `FRONT`.
 
-3. Follow [this page](./SG-FRONT.md) for downloading SG-FRONT and accessing more information.
-
+The structure should be similar like this:
+```
+FRONT
+|--3D-FRONT
+|--3D-FRONT_preprocessed (by ATISS)
+|--threed_front.pkl (by ATISS)
+|--3D-FRONT-texture
+|--3D-FUTURE-model
+|--3D-FUTURE-scene
+|--3D-FUTURE-SDF
+|--All SG-FRONT files (.json and .txt)
+```
 ### Models
 **Essential:** Download pretrained VQ-VAE model from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/vqvae_threedfront_best.pth) to the folder `scripts/checkpoint`.
 
@@ -54,14 +68,14 @@ To train the models, run:
 
 ```
 cd scripts
-python train_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all --room_type livingroom --dataset /path/to/3D-FRONT --residual True --network_type v2_full --with_SDF True --with_CLIP True --batchSize 4 --workers 4 --loadmodel False --nepoch 10000 --large False
+python train_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all --room_type livingroom --dataset /path/to/FRONT --residual True --network_type v2_full --with_SDF True --with_CLIP True --batchSize 4 --workers 4 --loadmodel False --nepoch 10000 --large False
 ```
 `--room_type`: rooms to train, e.g., livingroom, diningroom, bedroom, and all. We train all rooms together in the implementation.
 
 `--network_type`: the network to be trained. `v1_box` is Graph-to-Box, `v1_full` is Graph-to-3D (DeepSDF version), `v2_box` is the layout branch of CommonScenes, and `v2_full` is CommonScenes.
-(Note:If you want to train `v1_full`, addtional reconstructed meshes and codes by DeepSDF should also be downloaded from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/DEEPSDF_reconstruction.zip)).
+(Note:If you want to train `v1_full`, addtional reconstructed meshes and codes by DeepSDF should also be downloaded from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/DEEPSDF_reconstruction.zip), and also copy to `FRONT`).
 
-`--with_SDF`: set to `True` if train v1_full, and not used in other cases.
+`--with_SDF`: set to `True` if train v2_full.
 
 `--with_CLIP `: set to `True` if train v2_box or v2_full, and not used in other cases.
 
@@ -88,7 +102,7 @@ python eval_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all 
 
 
 ### FID/KID
-This metric aims to evaluate scene-level fidelity. To evaluate FID/KID, you need to first download our preprocessed files of 3D-FUTURE meshes from [here](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/3D-FUTURE-SDF.zip), then collect ground truth top-down renderings by running `collect_gt_sdf_images.py`.
+This metric aims to evaluate scene-level fidelity. To evaluate FID/KID, you need to collect ground truth top-down renderings by running `collect_gt_sdf_images.py`.
 
 Make sure you download all the files and preprocess the 3D-FRONT. The renderings of generated scenes can be obtained inside `eval_3dfront.py`.
 
