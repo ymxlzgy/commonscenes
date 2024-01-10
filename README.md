@@ -37,14 +37,13 @@ cd ./extension
 python setup.py install
 ```
 ### Dataset
-1. Create a folder named `FRONT`
-2. Download the <a href="https://tianchi.aliyun.com/specials/promotion/alibaba-3d-scene-dataset">3D-FRONT dataset</a> from their official site.
+1. Download the <a href="https://tianchi.aliyun.com/specials/promotion/alibaba-3d-scene-dataset">3D-FRONT dataset</a> from their official site.
 
-3. Preprocess the dataset following  <a href="https://github.com/nv-tlabs/ATISS#data-preprocessing">ATISS</a>.
-4. Download [3D-FUTURE-SDF](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/3D-FUTURE-SDF.zip). This is processed by ourselves on the 3D-FUTURE meshes using tools in [SDFusion](https://github.com/yccyenchicheng/SDFusion).
+2. Preprocess the dataset following  <a href="https://github.com/nv-tlabs/ATISS#data-preprocessing">ATISS</a>.
+3. Download [3D-FUTURE-SDF](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/3D-FUTURE-SDF.zip). This is processed by ourselves on the 3D-FUTURE meshes using tools in [SDFusion](https://github.com/yccyenchicheng/SDFusion).
 
-5. Follow [this page](./SG-FRONT.md) for downloading SG-FRONT and accessing more information.
-6. Copy all files to `FRONT`.
+4. Follow [this page](./SG-FRONT.md) for downloading SG-FRONT and accessing more information.
+5. Create a folder named `FRONT`, and copy all files to it.
 
 The structure should be similar like this:
 ```
