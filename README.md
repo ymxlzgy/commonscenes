@@ -83,7 +83,7 @@ python train_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all
 `--large` : default is `False`, `True` means more concrete categories.
 
 We provide three examples here: [Graph-to-3D (DeepSDF version)](./scripts/train_Graph-to-3D.sh), [Graph-to-Box](./scripts/train_Graph-to-Box.sh), [CommonScenes](./scripts/train_CommonScenes.sh).
-
+The recommanded GPU is a single A100 for CommonScenes, though 3090 can also train the network with a lower batch size on the shape branch. 
 ## Evaluation
 
 To evaluate the models run:
@@ -110,7 +110,9 @@ After obtaining both ground truth images and generated scenes renderings, run `c
 This metric aims to evaluate object-level fidelity. Please follow the implementation in [PointFlow](https://github.com/stevenygd/PointFlow). To evaluate this, you need to store object by object in the generated scenes, which can be done in `eval_3dfront.py`. 
 
 After obtaining object meshes, run `compute_mmd_cov_1nn.py` to have the results.
+
 ## Acknowledgements
+
 If you find this work useful in your research, please cite
 
 ```
@@ -122,3 +124,5 @@ If you find this work useful in your research, please cite
 ```
 
 This repository is based on <a href="https://github.com/he-dhamo/graphto3d">Graph-to-3D</a> and <a href="https://github.com/yccyenchicheng/SDFusion">SDFusion</a>. We thank the authors for making their code available.
+### Disclaimer
+Tired students finished the pipeline in busy days...

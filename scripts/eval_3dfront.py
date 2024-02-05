@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--num_points', type=int, default=1024, help='number of points in the shape')
 parser.add_argument('--num_samples', type=int, default=3, help='for diversity')
 
-parser.add_argument('--dataset', required=False, type=str, default="/media/ymxlzgy/Data/Dataset/3D-FRONT", help="dataset path")
+parser.add_argument('--dataset', required=False, type=str, default="/media/ymxlzgy/Data/Dataset/FRONT", help="dataset path")
 parser.add_argument('--with_points', type=bool_flag, default=False, help="if false, only predicts layout")
 parser.add_argument('--with_feats', type=bool_flag, default=False, help="Load Feats directly instead of points.")
 parser.add_argument('--with_CLIP', type=bool_flag, default=True, help="Load Feats directly instead of points.")
@@ -189,11 +189,11 @@ def evaluate():
 
     print('\nEditing Mode - Additions')
     reseed(47)
-    validate_constrains_loop_w_changes(modelArgs, test_dataloader_add_changes, model, normalized_file=normalized_file, with_diversity=args.evaluate_diversity, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
+    # validate_constrains_loop_w_changes(modelArgs, test_dataloader_add_changes, model, normalized_file=normalized_file, with_diversity=args.evaluate_diversity, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
 
     reseed(47)
     print('\nEditing Mode - Relationship changes')
-    validate_constrains_loop_w_changes(modelArgs, test_dataloader_rels_changes, model,  normalized_file=normalized_file, with_diversity=args.evaluate_diversity, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
+    # validate_constrains_loop_w_changes(modelArgs, test_dataloader_rels_changes, model,  normalized_file=normalized_file, with_diversity=args.evaluate_diversity, with_angles=modelArgs['with_angles'], num_samples=args.num_samples, cat2objs=cat2objs, datasize='large' if modelArgs['large'] else 'small', gen_shape=args.gen_shape)
 
     reseed(47)
     print('\nGeneration Mode')

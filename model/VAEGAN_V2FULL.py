@@ -450,10 +450,10 @@ class Sg2ScVAEModel(nn.Module):
                 # TODO: balance every object.
                 # essential_names = self.obj_classes_grained
                 selected_cat_ids = self.balance_objects(obj_cat_grained[ids], obj_cat[ids], num_obj)
-                sdf_selected.append(sdf_candidates[selected_cat_ids])
-                uc_rel_selected.append(uc_rel[selected_cat_ids])
-                c_rel_selected.append(c_rel[selected_cat_ids])
-                obj_cat_selected.append(obj_cat[selected_cat_ids])
+                sdf_selected.append(sdf_candidates[ids][selected_cat_ids])
+                uc_rel_selected.append(uc_rel[ids][selected_cat_ids])
+                c_rel_selected.append(c_rel[ids][selected_cat_ids])
+                obj_cat_selected.append(obj_cat[ids][selected_cat_ids])
 
         sdf_selected = torch.cat(sdf_selected, dim=0).cuda()
         uc_rel_selected = torch.cat(uc_rel_selected, dim=0).cuda()
