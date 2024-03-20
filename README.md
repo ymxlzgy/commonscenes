@@ -117,11 +117,15 @@ After obtaining object meshes, run `compute_mmd_cov_1nn.py` to have the results.
 If you find this work useful in your research, please cite
 
 ```
-@article{zhai2023commonscenes,
+@inproceedings{
+  zhai2023commonscenes,
   title={CommonScenes: Generating Commonsense 3D Indoor Scenes with Scene Graph Diffusion},
   author={Zhai, Guangyao and {\"O}rnek, Evin P{\i}nar and Wu, Shun-Cheng and Di, Yan and Tombari, Federico and Navab, Nassir and Busam, Benjamin},
-  journal={arXiv preprint arXiv:2305.16283},
-  year={2023}
+  booktitle={Thirty-seventh Conference on Neural Information Processing Systems},
+  year={2023},
+  url={https://openreview.net/forum?id=1SF2tiopYJ}
+}
+
 ```
 
 This repository is based on <a href="https://github.com/he-dhamo/graphto3d">Graph-to-3D</a> and <a href="https://github.com/yccyenchicheng/SDFusion">SDFusion</a>. We thank the authors for making their code available.
