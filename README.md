@@ -5,9 +5,10 @@ This is the official implementation of the paper **CommonScenes: Generating Comm
 
 <a href="https://sites.google.com/view/commonscenes">Website</a> | <a href="https://arxiv.org/pdf/2305.16283.pdf">Arxiv</a>
 
-[Guangyao Zhai](https://ymxlzgy.com/), [Evin Pınar Örnek](https://evinpinar.github.io/), [Shun-Cheng Wu](https://shunchengwu.github.io/), [Yan Di](https://shangbuhuan13.github.io/), [Federico Tombari](https://federicotombari.github.io/), [Nassir Navab](https://www.cs.cit.tum.de/camp/members/cv-nassir-navab/nassir-navab/), and [Benjamin Busam](https://www.cs.cit.tum.de/camp/members/benjamin-busam/)
-<br/>
+[Guangyao Zhai](https://ymxlzgy.com/) *, [Evin Pınar Örnek](https://evinpinar.github.io/) *, [Shun-Cheng Wu](https://shunchengwu.github.io/), [Yan Di](https://shangbuhuan13.github.io/), [Federico Tombari](https://federicotombari.github.io/), [Nassir Navab](https://www.cs.cit.tum.de/camp/members/cv-nassir-navab/nassir-navab/), and [Benjamin Busam](https://www.cs.cit.tum.de/camp/members/benjamin-busam/). (*Equal contribution.)
+<br/> 
 **NeurIPS 2023**
+
 
 
 ## Setup
