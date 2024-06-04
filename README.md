@@ -102,7 +102,7 @@ python eval_3dfront.py --exp /media/ymxlzgy/Data/graphto3d_models/balancing/all 
 
 
 ### FID/KID
-This metric aims to evaluate scene-level fidelity. To evaluate FID/KID, you need to collect ground truth top-down renderings by running `collect_gt_sdf_images.py`.
+This metric aims to evaluate scene-level fidelity. To evaluate FID/KID, you first need to download top-down [gt rendered images](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/gt_fov90_h8_wo_lamp_no_stool.zip) for retrieval methods and [sdf rendered images](https://www.campar.in.tum.de/public_datasets/2023_commonscenes_zhai/sdf_fov90_h8_wo_lamp_no_stool.zip) for generative methods, or collect renderings by modifying and running `collect_gt_sdf_images.py`. Note that the flag `without_lamp` is set to `True` in our experiment.
 
 Make sure you download all the files and preprocess the 3D-FRONT. The renderings of generated scenes can be obtained inside `eval_3dfront.py`.
 
